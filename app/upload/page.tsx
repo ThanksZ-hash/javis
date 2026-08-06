@@ -28,7 +28,7 @@ type SitePhotoItem = {
   errorMessage?: string;
 };
 
-function readFileAsBase64(file: File): Promise<string> {
+function readFileAsBase64(file: File | Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -40,14 +40,58 @@ function readFileAsBase64(file: File): Promise<string> {
   });
 }
 
+// 폰 카메라 사진은 보통 몇 MB~십몇 MB라, Vercel 함수 요청 본문 제한(4.5MB)에 안전하게
+// 걸리도록 AI 분석용으로만 리사이즈·재압축한 사본을 만듭니다. Storage에 실제로 저장되는
+// 원본 파일(item.file)은 그대로 두고, 이 압축본은 Gemini 호출에만 씁니다.
+async function compressImageForInference(
+  file: File,
+  maxDimension = 1600,
+  quality = 0.8
+): Promise<{ base64: string; mimeType: string }> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = reject;
+      el.src = objectUrl;
+    });
+
+    const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
+    const width = Math.round(img.width * scale);
+    const height = Math.round(img.height * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("canvas context 생성 실패");
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality)
+    );
+    if (!blob) throw new Error("이미지 압축 실패");
+
+    const base64 = await readFileAsBase64(blob);
+    return { base64, mimeType: "image/jpeg" };
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 async function inferMetadata(file: File) {
   const isImage = file.type.startsWith("image/");
-  const canAnalyzeImage = isImage && file.size < 3 * 1024 * 1024;
-
   const body: Record<string, string> = { fileName: file.name };
-  if (canAnalyzeImage) {
-    body.imageBase64 = await readFileAsBase64(file);
-    body.mimeType = file.type;
+
+  if (isImage) {
+    try {
+      const { base64, mimeType } = await compressImageForInference(file);
+      body.imageBase64 = base64;
+      body.mimeType = mimeType;
+    } catch {
+      // 압축이 실패해도 파일명 기반 추론은 계속 시도합니다.
+    }
   }
 
   const res = await fetch("/api/infer-metadata", {
@@ -61,26 +105,48 @@ async function inferMetadata(file: File) {
 
 async function inferSitePhotoWorkLog(file: File) {
   if (!file.type.startsWith("image/")) {
-    return { location: "", work_content: "", tags: [] };
+    return { location: "", work_content: "", tags: [], error: "이미지 파일만 지원합니다." };
   }
 
-  if (file.size >= 3 * 1024 * 1024) {
-    return { location: "", work_content: "", tags: [] };
+  let imageBase64: string;
+  let mimeType: string;
+  try {
+    const compressed = await compressImageForInference(file);
+    imageBase64 = compressed.base64;
+    mimeType = compressed.mimeType;
+  } catch {
+    return {
+      location: "",
+      work_content: "",
+      tags: [],
+      error: "사진을 처리하지 못했습니다. 다른 사진으로 다시 시도해주세요.",
+    };
   }
 
-  const imageBase64 = await readFileAsBase64(file);
-  const res = await fetch("/api/infer-metadata", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      fileName: file.name,
-      imageBase64,
-      mimeType: file.type,
-      mode: "site-photo-work-log",
-    }),
-  });
-  const data = await res.json();
-  return res.ok ? data : { location: "", work_content: "", tags: [] };
+  try {
+    const res = await fetch("/api/infer-metadata", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fileName: file.name,
+        imageBase64,
+        mimeType,
+        mode: "site-photo-work-log",
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return { location: "", work_content: "", tags: [], error: data.error || "AI 추론에 실패했습니다." };
+    }
+    return data;
+  } catch {
+    return {
+      location: "",
+      work_content: "",
+      tags: [],
+      error: "네트워크 오류로 AI 추론에 실패했습니다.",
+    };
+  }
 }
 
 function storagePathFor(file: File) {
@@ -197,13 +263,22 @@ export default function UploadPage() {
                   workContent: inferred.work_content || "",
                   tags: Array.isArray(inferred.tags) ? inferred.tags.join(", ") : "",
                   inferring: false,
+                  errorMessage: inferred.error,
                 }
               : it
           )
         );
       } catch {
         setSitePhotoItems((prev) =>
-          prev.map((it) => (it.file === item.file ? { ...it, inferring: false } : it))
+          prev.map((it) =>
+            it.file === item.file
+              ? {
+                  ...it,
+                  inferring: false,
+                  errorMessage: "AI 추론 중 오류가 발생했습니다. 직접 입력해주세요.",
+                }
+              : it
+          )
         );
       }
     });
@@ -593,7 +668,7 @@ export default function UploadPage() {
                     </div>
                   )}
 
-                  {item.status === "error" && (
+                  {item.errorMessage && (
                     <p className="mt-1 text-xs text-red-600">{item.errorMessage}</p>
                   )}
                 </li>
