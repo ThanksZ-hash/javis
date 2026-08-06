@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export default function UploadPage() {
   const [description, setDescription] = useState("");
@@ -24,22 +25,44 @@ export default function UploadPage() {
     setStatus("loading");
     setMessage("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("description", description);
-
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
+      // 브라우저에서 Supabase Storage로 직접 업로드합니다.
+      // (Vercel 서버리스 함수는 요청 본문이 4.5MB로 제한되어 있어, 그걸 거치지 않습니다.)
+      const extMatch = file.name.match(/\.[a-zA-Z0-9]+$/);
+      const ext = extMatch ? extMatch[0] : "";
+      const storagePath = `${crypto.randomUUID()}${ext}`;
 
-      if (!res.ok) {
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(storagePath, file, {
+          contentType: file.type || "application/octet-stream",
+        });
+
+      if (uploadError) {
         setStatus("error");
-        setMessage(data.error || "업로드에 실패했습니다.");
+        setMessage(`업로드에 실패했습니다: ${uploadError.message}`);
+        return;
+      }
+
+      const { data, error: insertError } = await supabase
+        .from("documents")
+        .insert({
+          file_name: file.name,
+          storage_path: storagePath,
+          description,
+          file_size: file.size,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        setStatus("error");
+        setMessage(`문서 정보 저장에 실패했습니다: ${insertError.message}`);
         return;
       }
 
       setStatus("done");
-      setMessage(`"${data.document.file_name}" 문서가 저장되었습니다.`);
+      setMessage(`"${data.file_name}" 문서가 저장되었습니다.`);
       setDescription("");
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch {
