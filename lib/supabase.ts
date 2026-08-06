@@ -10,6 +10,7 @@ export type DocumentRow = {
   file_name: string;
   storage_path: string;
   description: string | null;
+  site_name: string | null;
   file_size: number | null;
   uploaded_at: string;
 };

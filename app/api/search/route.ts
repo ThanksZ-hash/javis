@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-clients/server";
 import { findMatchingDocumentIndices } from "@/lib/gemini";
 
 export async function POST(req: NextRequest) {
+  const supabase = await createClient();
   const { query } = await req.json();
 
   if (!query || typeof query !== "string" || !query.trim()) {
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
 
   const { data: documents, error } = await supabase
     .from("documents")
-    .select("document_id, file_name, storage_path, description, file_size, uploaded_at")
+    .select("document_id, file_name, storage_path, description, site_name, file_size, uploaded_at")
     .order("uploaded_at", { ascending: false });
 
   if (error) {
@@ -39,12 +40,14 @@ export async function POST(req: NextRequest) {
     .filter((i) => i >= 0 && i < documents.length)
     .map((i) => documents[i]);
 
-  const results = matched.map((doc) => {
-    const { data: urlData } = supabase.storage
-      .from("documents")
-      .getPublicUrl(doc.storage_path);
-    return { ...doc, url: urlData.publicUrl };
-  });
+  const results = await Promise.all(
+    matched.map(async (doc) => {
+      const { data: urlData } = await supabase.storage
+        .from("documents")
+        .createSignedUrl(doc.storage_path, 60 * 10);
+      return { ...doc, url: urlData?.signedUrl || null };
+    })
+  );
 
   return NextResponse.json({ results });
 }
