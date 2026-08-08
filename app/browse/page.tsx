@@ -46,34 +46,40 @@ export default function BrowsePage() {
   });
 
   return (
-    <div className="flex flex-col flex-1 items-center bg-zinc-50 px-4 py-12 dark:bg-black">
+    <div className="luxury-surface flex flex-col flex-1 items-center px-4 py-12">
       <div className="w-full max-w-md">
-        <Link href="/" className="text-sm text-zinc-500 hover:underline">
-          ← 검색으로 돌아가기
+        <Link href="/help" className="luxury-link text-sm">
+          ← 시작하기
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+        <h1 className="mt-4 font-serif text-2xl font-medium tracking-wide text-[var(--luxury-text)]">
           전체 문서
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-[var(--luxury-text-muted)]">
           현장·구역명별로 묶어서 저장된 문서 전체를 보여줍니다 (총 {documents.length}개).
         </p>
 
         {state === "loading" && (
-          <p className="mt-6 text-sm text-zinc-500">불러오는 중...</p>
+          <p className="mt-6 text-sm text-[var(--luxury-text-muted)]">불러오는 중...</p>
         )}
         {state === "error" && (
-          <p className="mt-6 text-sm text-red-600">{errorMessage}</p>
+          <p className="mt-6 text-sm text-rose-400">
+            <span className="mr-1 font-semibold">오류</span>
+            {errorMessage}
+          </p>
         )}
         {state === "done" && documents.length === 0 && (
-          <p className="mt-6 text-sm text-zinc-500">아직 업로드된 문서가 없습니다.</p>
+          <p className="mt-6 text-sm text-[var(--luxury-text-muted)]">
+            <span className="mr-1 font-semibold text-[var(--luxury-accent-soft)]">안내</span>
+            아직 업로드된 문서가 없습니다.
+          </p>
         )}
 
         {state === "done" &&
           groupNames.map((name) => (
             <div key={name} className="mt-8">
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              <h2 className="font-serif text-lg font-medium text-[var(--luxury-text)]">
                 {name}
-                <span className="ml-2 text-sm font-normal text-zinc-400">
+                <span className="ml-2 text-sm font-normal text-[var(--luxury-text-muted)]">
                   {groups[name].length}개
                 </span>
               </h2>

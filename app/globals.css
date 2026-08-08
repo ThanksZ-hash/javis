@@ -3,6 +3,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* javis luxury design tokens (다크 베이스 + 골드 포인트) */
+  --luxury-bg: #0a0908;
+  --luxury-bg-elevated: #14120f;
+  --luxury-card: rgba(24, 21, 17, 0.6);
+  --luxury-border: rgba(201, 162, 39, 0.16);
+  --luxury-border-strong: rgba(201, 162, 39, 0.35);
+  --luxury-accent: #c9a227;
+  --luxury-accent-soft: #e4c76a;
+  --luxury-text: #f3ead9;
+  --luxury-text-muted: #a89f8f;
 }
 
 @theme inline {
@@ -23,4 +34,133 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  color-scheme: dark;
+  -webkit-tap-highlight-color: rgba(201, 162, 39, 0.18);
+  text-size-adjust: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  touch-action: manipulation;
+}
+
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* javis 럭셔리 톤 — 홈/검색 화면을 시작으로 다른 화면에도 재사용 예정 */
+@layer components {
+  .luxury-surface {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 162, 39, 0.08), transparent),
+      var(--luxury-bg);
+  }
+
+  .luxury-card {
+    background: var(--luxury-card);
+    border: 1px solid var(--luxury-border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  }
+
+  .luxury-card:hover {
+    border-color: var(--luxury-border-strong);
+  }
+
+  .luxury-input {
+    background: var(--luxury-bg-elevated);
+    border: 1px solid var(--luxury-border);
+    color: var(--luxury-text);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .luxury-input::placeholder {
+    color: var(--luxury-text-muted);
+  }
+
+  .luxury-input:focus {
+    outline: none;
+    border-color: var(--luxury-accent);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
+  }
+
+  .luxury-btn-primary {
+    background: linear-gradient(180deg, var(--luxury-accent-soft), var(--luxury-accent));
+    color: #171106;
+    transition: filter 0.2s ease, transform 0.2s ease;
+    /* iOS Safari가 탭을 텍스트 선택 제스처로 인식해 버튼이 안 눌리는 문제 방지.
+       접두사 없는 user-select만으로는 iOS에서 씹히는 경우가 있어 -webkit- 버전을 명시. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+  }
+
+  .luxury-btn-primary:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+
+  .luxury-btn-primary:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .luxury-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.35);
+  }
+
+  .luxury-btn-ghost {
+    border: 1px solid var(--luxury-border);
+    color: var(--luxury-text-muted);
+    transition: border-color 0.2s ease, color 0.2s ease;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+  }
+
+  .luxury-btn-ghost:hover:not(:disabled) {
+    border-color: var(--luxury-border-strong);
+    color: var(--luxury-accent-soft);
+  }
+
+  .luxury-btn-ghost:focus-visible {
+    outline: none;
+    border-color: var(--luxury-accent);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
+  }
+
+  .luxury-link {
+    color: var(--luxury-text-muted);
+    transition: color 0.2s ease;
+  }
+
+  .luxury-link:hover {
+    color: var(--luxury-accent-soft);
+  }
+
+  .luxury-badge {
+    background: rgba(201, 162, 39, 0.1);
+    border: 1px solid var(--luxury-border-strong);
+    color: var(--luxury-accent-soft);
+  }
+
+  .luxury-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--luxury-border-strong), transparent);
+    border: none;
+  }
 }

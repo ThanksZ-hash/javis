@@ -14,6 +14,14 @@
 - 비공개 Supabase Storage + 만료형 signed URL
 - 현장사진 업무일지 생성
 - Google Sheets 업무일지 웹훅 기록
+- 모바일/안드로이드 브라우저 대응
+- Google Sheets 확인 후 앱 복귀 화면
+
+## 배포 주소
+
+```text
+https://javis-mauve.vercel.app
+```
 
 ## 로컬 실행
 
@@ -67,6 +75,6 @@ Google Sheets 컬럼:
 날짜 | 시간 | 위치 | 업무내용 | 태그 | 파일명 | 문서ID
 ```
 
-## 배포 원칙
+## 제출 참고
 
-현재 프로덕션 배포는 보류 중입니다. 사용자가 명시적으로 요청하기 전까지 배포하지 않습니다.
+제출용 zip에는 `node_modules`, `.next`, `.env.local`, `.git`, `.vercel`, 실제 업무 원본 폴더를 제외합니다.

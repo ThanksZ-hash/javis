@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // 로그인 없이도 볼 수 있는 경로만 허용 목록에 둡니다.
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/manifest.webmanifest"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });

@@ -6,16 +6,17 @@ type WorkLogSheetPayload = {
   location: string;
   work_content: string;
   tags: string[];
-  file_name: string;
+  // 키워드 입력 기록은 사진/파일이 없으므로 file_name이 없을 수 있습니다.
+  file_name?: string;
   document_id?: string;
 };
 
 export async function POST(req: NextRequest) {
   const payload = (await req.json()) as Partial<WorkLogSheetPayload>;
 
-  if (!payload.location || !payload.work_content || !payload.file_name) {
+  if (!payload.location || !payload.work_content) {
     return NextResponse.json(
-      { error: "위치, 업무내용, 파일명이 필요합니다." },
+      { error: "위치와 업무내용이 필요합니다." },
       { status: 400 }
     );
   }
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
       location: payload.location,
       work_content: payload.work_content,
       tags: payload.tags || [],
-      file_name: payload.file_name,
+      file_name: payload.file_name || "",
       document_id: payload.document_id,
     }),
   });

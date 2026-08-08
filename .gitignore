@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# raw CAD source drawings (large, real project files — not for git)
+/DWG/

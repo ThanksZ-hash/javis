@@ -1,0 +1,22 @@
+.git/
+.claude/
+.obsidian/
+.next/
+node_modules/
+DWG/
+coverage/
+out/
+build/
+screenshots/
+sample-photos/
+업무일지 참조 이지현/
+.env*
+*.tsbuildinfo
+*.log
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+.DS_Store

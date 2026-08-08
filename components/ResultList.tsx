@@ -66,25 +66,27 @@ export function ResultList({ results }: { results: SearchResult[] }) {
         return (
           <li
             key={doc.document_id}
-            className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800"
+            className="luxury-card rounded-xl p-4 transition-colors"
           >
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-3">
               {doc.url ? (
                 <a
                   href={doc.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="truncate font-medium text-zinc-900 hover:underline dark:text-zinc-50"
+                  className="truncate text-sm font-medium text-[var(--luxury-text)] hover:text-[var(--luxury-accent-soft)]"
                 >
                   {doc.file_name}
                 </a>
               ) : (
-                <span className="truncate font-medium text-zinc-400">{doc.file_name}</span>
+                <span className="truncate text-sm font-medium text-[var(--luxury-text-muted)]">
+                  {doc.file_name}
+                </span>
               )}
               <button
                 type="button"
                 onClick={() => handleBrief(doc.document_id)}
-                className="shrink-0 rounded border border-zinc-300 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="luxury-btn-ghost shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-medium"
               >
                 {brief?.loading
                   ? "요약 중..."
@@ -94,20 +96,30 @@ export function ResultList({ results }: { results: SearchResult[] }) {
               </button>
             </div>
             {doc.site_name && (
-              <span className="mt-1 inline-block rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800">
+              <span className="luxury-badge mt-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium tracking-wide">
                 {doc.site_name}
               </span>
             )}
             {doc.description && (
-              <p className="mt-1 text-sm text-zinc-500">{doc.description}</p>
-            )}
-            {brief?.brief && (
-              <p className="mt-2 whitespace-pre-wrap rounded bg-zinc-50 p-2 text-sm text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-                {brief.brief}
+              <p className="mt-2 text-sm leading-relaxed text-[var(--luxury-text-muted)]">
+                {doc.description}
               </p>
             )}
+            {brief?.brief && (
+              <div className="mt-3 rounded-lg border border-[var(--luxury-border)] bg-black/20 p-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--luxury-accent-soft)]">
+                  AI 브리핑
+                </span>
+                <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-[var(--luxury-text)]">
+                  {brief.brief}
+                </p>
+              </div>
+            )}
             {brief?.error && (
-              <p className="mt-2 text-sm text-red-600">{brief.error}</p>
+              <p className="mt-2 text-sm text-rose-400">
+                <span className="mr-1.5 font-semibold">오류</span>
+                {brief.error}
+              </p>
             )}
           </li>
         );

@@ -41,31 +41,36 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/help");
     router.refresh();
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-4 dark:bg-black">
-      <div className="w-full max-w-sm rounded-lg border border-zinc-200 p-8 text-center dark:border-zinc-800">
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          javis 문서 검색
+    <div className="luxury-surface flex flex-1 items-center justify-center px-4">
+      <div className="luxury-card w-full max-w-sm rounded-xl p-8 text-center">
+        <h1 className="font-serif text-2xl font-medium tracking-wide text-[var(--luxury-text)]">
+          javis
         </h1>
-        <p className="mt-2 text-sm text-zinc-500">로그인 후 이용할 수 있습니다.</p>
+        <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[var(--luxury-text-muted)]">
+          문서 검색
+        </p>
+        <p className="mt-4 text-sm text-[var(--luxury-text-muted)]">
+          로그인 후 이용할 수 있습니다.
+        </p>
 
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="mt-6 w-full rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+          className="luxury-btn-ghost mt-6 w-full rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
         >
           {loading ? "이동 중..." : "Google로 로그인"}
         </button>
 
-        <div className="mt-6 flex items-center gap-2 text-xs text-zinc-400">
-          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+        <div className="mt-6 flex items-center gap-2 text-xs text-[var(--luxury-text-muted)]">
+          <div className="luxury-divider flex-1" />
           또는 테스트 계정
-          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+          <div className="luxury-divider flex-1" />
         </div>
 
         <form onSubmit={handlePasswordLogin} className="mt-4 flex flex-col gap-2 text-left">
@@ -74,25 +79,30 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="이메일"
-            className="rounded-md border border-zinc-300 p-2 text-sm dark:border-zinc-700"
+            className="luxury-input rounded-md p-2 text-sm"
           />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호"
-            className="rounded-md border border-zinc-300 p-2 text-sm dark:border-zinc-700"
+            className="luxury-input rounded-md p-2 text-sm"
           />
           <button
             type="submit"
             disabled={loading}
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+            className="luxury-btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>
 
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="mt-4 text-sm text-rose-400">
+            <span className="mr-1 font-semibold">오류</span>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );
